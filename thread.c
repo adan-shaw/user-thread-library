@@ -7,7 +7,7 @@
 //汇编码switch_to() 是错误的, 什么东西?
 //void switch_to (struct task_struct *next);
 
-//线程上下文切换(作者流了一手, 666, 禁用这句调用, 可以编译通过, 但执行会出错)
+//线程上下文切换(作者流了一手, 666, 禁用这句调用, 可以编译通过, 但执行会出错 [在298 行])
 /*
 void switch_to (struct task_struct *next){
 	__asm__(
@@ -92,11 +92,11 @@ int th_create (int *tid, void (*start_routine) ())
 	stack[STACK_SIZE - 7] = 0;		// ebx
 	stack[STACK_SIZE - 6] = 0;		// esi
 	stack[STACK_SIZE - 5] = 0;		// edi
-	stack[STACK_SIZE - 4] = 0;		// old ebp  
-	stack[STACK_SIZE - 3] = (int) start;	// ret to start   线程第一次被调度时会在此启动
+	stack[STACK_SIZE - 4] = 0;		// old ebp
+	stack[STACK_SIZE - 3] = (int) start;	// ret to start 线程第一次被调度时会在此启动
 	// start 函数栈帧, 刚进入 start 函数的样子 
-	stack[STACK_SIZE - 2] = 100;	// ret to unknown, 如果 start 执行结束, 表明线程结束 
-	stack[STACK_SIZE - 1] = (int) tsk;	// start 的参数
+	stack[STACK_SIZE - 2] = 100;					// ret to unknown, 如果 start 执行结束, 表明线程结束 
+	stack[STACK_SIZE - 1] = (int) tsk;		// start 的参数
 
 	//汇编函数调用,c风格参数传递; 传入参数分别是IP,c1,c2
 	return 0;
@@ -294,7 +294,7 @@ void schedule (void)
 	struct task_struct *next = pick ();
 	if (next)
 	{
-		//这句话的汇编语言是出错的, debugging
+		// * 这句话的汇编语言是出错的, debugging *
 		switch_to (next);
 	}
 }
