@@ -4,9 +4,11 @@
 #include <sys/time.h>
 #include <stdio.h>
 
-
+//汇编码switch_to() 是错误的, 什么东西?
 //void switch_to (struct task_struct *next);
 
+//线程上下文切换(作者流了一手, 666, 禁用这句调用, 可以编译通过, 但执行会出错)
+/*
 void switch_to (struct task_struct *next){
 	__asm__(
 		"call closealarm \n"   //调用函数closealarm
@@ -43,14 +45,13 @@ void switch_to (struct task_struct *next){
 		"call openalarm \n"    //调用函数openalarm
 	);
 }
-
+*/
 
 static struct task_struct init_task = { 0, NULL, 0, THREAD_RUNNING, 0, 15, 15, {0} };
 
 struct task_struct *current = &init_task;
 
 struct task_struct *task[NR_TASKS] = { &init_task, };
-
 
 
 
@@ -293,6 +294,7 @@ void schedule (void)
 	struct task_struct *next = pick ();
 	if (next)
 	{
+		//这句话的汇编语言是出错的, debugging
 		switch_to (next);
 	}
 }
