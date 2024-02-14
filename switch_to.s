@@ -2,7 +2,7 @@
 .global switch_to
 
 switch_to:
-	call closealarm   /* 模拟关中断 */
+	call closealarm   /* 调用函数closealarm */
 
 	push %ebp
 	mov %esp, %ebp    /* 更改栈帧, 以便寻参 */
@@ -33,6 +33,6 @@ switch_to:
 	popl %edi
 	popl %ebp
 
-	call openalarm    /* 模拟开中断 */
+	call openalarm    /* 调用函数openalarm */
 ret
 
