@@ -4,7 +4,7 @@
 #include <sys/time.h>
 #include <stdio.h>
 
-void schedule ();
+extern void schedule (void);
 
 static struct task_struct init_task = { 0, NULL, 0, THREAD_RUNNING, 0, 15, 15, {0} };
 
@@ -23,10 +23,10 @@ static void start (struct task_struct *tsk)
 	printf ("thread [%d] exited\n", tsk->id);
 	schedule ();
 	// 下面这一行永远不会被执行
-	printf ("thread [%d] resume\n", tsk->id);
+	printf ("thread [%d] th_resume\n", tsk->id);
 }
 
-int thread_create (int *tid, void (*start_routine) ())
+int th_create (int *tid, void (*start_routine) ())
 {
 	int id = -1;
 	struct task_struct *tsk = (struct task_struct *) malloc (sizeof (struct task_struct));
@@ -54,8 +54,8 @@ int thread_create (int *tid, void (*start_routine) ())
 	stack[STACK_SIZE - 5] = 0;		// edi
 	stack[STACK_SIZE - 4] = 0;		// old ebp  
 	stack[STACK_SIZE - 3] = (int) start;	// ret to start   线程第一次被调度时会在此启动
-	// start 函数栈帧，刚进入 start 函数的样子 
-	stack[STACK_SIZE - 2] = 100;	// ret to unknown，如果 start 执行结束，表明线程结束 
+	// start 函数栈帧, 刚进入 start 函数的样子 
+	stack[STACK_SIZE - 2] = 100;	// ret to unknown, 如果 start 执行结束, 表明线程结束 
 	stack[STACK_SIZE - 1] = (int) tsk;	// start 的参数
 
 	/*
@@ -65,7 +65,7 @@ int thread_create (int *tid, void (*start_routine) ())
 	return 0;
 }
 
-void wait (int tid)
+void th_wait (int tid)
 {
 	if (task[tid] != NULL && task[tid]->status != THREAD_STOP && task[tid]->status != THREAD_EXIT)
 	{
@@ -73,7 +73,7 @@ void wait (int tid)
 	}
 }
 
-void resume (int tid)
+void th_resume (int tid)
 {
 	if (task[tid] != NULL && task[tid]->status != THREAD_STOP && task[tid]->status != THREAD_EXIT && task[tid]->status == THREAD_BLOCK)
 	{
@@ -81,7 +81,7 @@ void resume (int tid)
 	}
 }
 
-void detach (int tid)
+void th_detach (int tid)
 {
 	if (task[tid] != NULL && task[tid]->status == THREAD_STOP && task[tid]->status != THREAD_EXIT)
 	{
@@ -90,7 +90,7 @@ void detach (int tid)
 	}
 }
 
-void wait_all ()
+void wait_all (void)
 {
 	int i = 0;
 	int remain = 0;
@@ -114,7 +114,7 @@ void wait_all ()
 	}
 }
 
-void wait_thread (int tid)
+void th_wait4quit (int tid)
 {
 	while (task[tid] && task[tid]->status != THREAD_EXIT)
 	{
@@ -122,7 +122,7 @@ void wait_thread (int tid)
 	}
 }
 
-void remove_th (int tid)
+void th_remove (int tid)
 {
 	if (task[tid])
 	{
@@ -132,15 +132,15 @@ void remove_th (int tid)
 	}
 }
 
-void dispose (int tid)
+void th_dispose (int tid)
 {
 	if (task[tid] != NULL)
 	{
-		task[tid]->status = THREAD_DISPOSED;
+		task[tid]->status = THREAD_th_disposeD;
 	}
 }
 
-int thread_join (int tid)
+int th_join (int tid)
 {
 	while (task[tid] && task[tid]->status != THREAD_EXIT)
 	{

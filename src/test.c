@@ -11,23 +11,21 @@ void handler (int sig)
 	}
 }
 
-__attribute__((constructor))
-void init ()
+__attribute__((constructor)) void init (void)
 {
 	printf ("construct\n");
 	if (signal (SIGALRM, handler) == SIG_ERR)
 	{
-		perror ("signal");
+		perror ("signal()");
 	}
 }
 
-__attribute__((destructor))
-void destory ()
+__attribute__((destructor)) void destory (void)
 {
 	printf ("destruct\n");
 }
 
-int main ()
+int main (void)
 {
 	struct itimerval value;
 	value.it_value.tv_sec = 0;
@@ -36,7 +34,7 @@ int main ()
 	value.it_interval.tv_usec = 1000 * 20;
 	if (setitimer (ITIMER_REAL, &value, NULL) < 0)
 	{
-		perror ("setitimer");
+		perror ("setitimer()");
 	}
 	while (1)
 		sleep (1);
