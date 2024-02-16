@@ -7,7 +7,7 @@
 //汇编码switch_to() 是错误的, 什么东西?
 extern void switch_to (struct task_struct *next);
 
-//线程上下文切换函数switch_to() (弃用, 只能使用汇编版本[仅限x86 架构] 其他cpu 架构学要重写汇编代码)
+//线程上下文切换函数switch_to() (只能使用汇编版本[仅限x86 架构], 其他cpu 架构可能要重写汇编代码)
 /*
 void switch_to (struct task_struct *next){
 	__asm__(
@@ -49,9 +49,10 @@ void switch_to (struct task_struct *next){
 
 		"call openalarm \n\t"    //调用函数openalarm
 
-		//汇编式函数返回, 相当于c 语言的return
+		//汇编式函数返回, 相当于c 语言的return ;
 		"ret\n"
 	);
+	return ;
 }
 */
 

@@ -18,24 +18,37 @@
 
 
 
-//
-// 线程上下文切换函数switch_to() (弃用, 只能使用汇编版本[仅限x86 架构] 其他cpu 架构学要重写汇编代码)
-//
+/*
+	pushf是32位的指令, 编译64位.o 程序出错, 解决办法:
+		* 编译时添加前缀-m32 
+		* 在汇编文件中, 添加.code32 前置声明(强制声明.s 汇编文件为32 bit)
+
+	拓展:
+		gcc-64bit 默认是没有gcc-32bit 的文件的, 还需要安装gcc-32bit:
+			apt-get install gcc-multilib
+*/
+.code32
+
+
+
+/*
+* 线程上下文切换函数switch_to() (只能使用汇编版本[仅限x86 架构], 其他cpu 架构可能要重写汇编代码)
+*/
 
 
 .section .text
 
-//声明switch_to() 函数为全局函数(在这里声明了, 相当于c 语言里面定义了一个普通全局函数) [ps: c语言里面的普通函数都是全局函数]
+/* 声明switch_to() 函数为全局函数(在这里声明了, 相当于c 语言里面定义了一个普通全局函数) [ps: c语言里面的普通函数都是全局函数] */
 .global switch_to
 
-//定义全局函数的详细内容
+/* 定义全局函数的详细内容 */
 switch_to:
-	call closealarm   // 调用函数closealarm()
+	call closealarm   /* 调用函数closealarm() */
 
 	push %ebp
-	mov %esp, %ebp    // 更改栈帧, 以便寻参
+	mov %esp, %ebp    /* 更改栈帧, 以便寻参 */
 
-										// 保存现场
+										/* 保存现场 */
 	push %edi
 	push %esi
 	push %ebx
@@ -44,14 +57,14 @@ switch_to:
 	push %eax
 	pushfl
 
-										// 准备切换栈
-	mov current, %eax // 取 current 基址放到 eax
-	mov %esp, 8(%eax) // 保存当前 esp 到线程结构体 
-	mov 8(%ebp), %eax // 8(%ebp)即为c语言的传入参数next, 取下一个线程结构体基址
-	mov %eax, current // 更新 current
-	mov 8(%eax), %esp // 切换到下一个线程的栈
+										/* 准备切换栈 */
+	mov current, %eax /* 取 current 基址放到 eax */
+	mov %esp, 8(%eax) /* 保存当前 esp 到线程结构体 */
+	mov 8(%ebp), %eax /* 8(%ebp)即为c语言的传入参数next, 取下一个线程结构体基址 */
+	mov %eax, current /* 更新 current */
+	mov 8(%eax), %esp /* 切换到下一个线程的栈 */
 
-										// 恢复现场, 到这里, 已经进入另一个线程环境了, 本质是 esp 改变
+										/* 恢复现场, 到这里, 已经进入另一个线程环境了, 本质是 esp 改变 */
 	popfl
 	popl %eax
 	popl %ecx
@@ -61,8 +74,8 @@ switch_to:
 	popl %edi
 	popl %ebp
 
-	call openalarm    // 调用函数openalarm()
+	call openalarm    /* 调用函数openalarm() */
 
-// 汇编式函数返回, 相当于c 语言的return
+/* 汇编式函数返回, 相当于c 语言的return */
 ret
 
