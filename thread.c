@@ -5,47 +5,57 @@
 #include <stdio.h>
 
 //汇编码switch_to() 是错误的, 什么东西?
-//void switch_to (struct task_struct *next);
+extern void switch_to (struct task_struct *next);
 
-//线程上下文切换(作者流了一手, 666, 禁用这句调用, 可以编译通过, 但执行会出错 [在298 行])
+//线程上下文切换函数switch_to() (弃用, 只能使用汇编版本[仅限x86 架构] 其他cpu 架构学要重写汇编代码)
 /*
 void switch_to (struct task_struct *next){
 	__asm__(
-		"call closealarm \n"   //调用函数closealarm
+		//在c 语言中声明了switch_to() 函数, 汇编中不能再声明了;
+		//".section .text\n"
+		//".global switch_to\n"
+		//"switch_to:\n\t"
 
-		"push %ebp \n"
-		"mov %esp, %ebp \n"    //更改栈帧, 以便寻参 
+		"call closealarm \n\t"   //调用函数closealarm
+
+		"push %ebp \n\t"
+		"mov %esp, %ebp \n\t"    //更改栈帧, 以便寻参 
 
 		//保存现场 
-		"push %edi \n"
-		"push %esi \n"
-		"push %ebx \n"
-		"push %edx \n"
-		"push %ecx \n"
-		"push %eax \n"
-		"pushfl \n"
+		"push %edi \n\t"
+		"push %esi \n\t"
+		"push %ebx \n\t"
+		"push %edx \n\t"
+		"push %ecx \n\t"
+		"push %eax \n\t"
+		"pushfl \n\t"
 
 		//准备切换栈 
-		"mov current, %eax \n" //取 current 基址放到 eax 
-		"mov %esp, 8(%eax) \n" //保存当前 esp 到线程结构体  
-		"mov 8(%ebp), %eax \n" //8(%ebp)即为c语言的传入参数next, 取下一个线程结构体基址
-		"mov %eax, current \n" //更新 current 
-		"mov 8(%eax), %esp \n" //切换到下一个线程的栈 
+		"mov current, %eax \n\t" //取 current 基址放到 eax 
+		"mov %esp, 8(%eax) \n\t" //保存当前 esp 到线程结构体  
+		"mov 8(%ebp), %eax \n\t" //8(%ebp)即为c语言的传入参数next, 取下一个线程结构体基址
+		"mov %eax, current \n\t" //更新 current 
+		"mov 8(%eax), %esp \n\t" //切换到下一个线程的栈 
 
 		//恢复现场, 到这里, 已经进入另一个线程环境了, 本质是 esp 改变 
-		"popfl \n"
-		"popl %eax \n"
-		"popl %ecx \n"
-		"popl %edx \n"
-		"popl %ebx \n"
-		"popl %esi \n"
-		"popl %edi \n"
-		"popl %ebp \n"
+		"popfl \n\t"
+		"popl %eax \n\t"
+		"popl %ecx \n\t"
+		"popl %edx \n\t"
+		"popl %ebx \n\t"
+		"popl %esi \n\t"
+		"popl %edi \n\t"
+		"popl %ebp \n\t"
 
-		"call openalarm \n"    //调用函数openalarm
+		"call openalarm \n\t"    //调用函数openalarm
+
+		//汇编式函数返回, 相当于c 语言的return
+		"ret\n"
 	);
 }
 */
+
+
 
 static struct task_struct init_task = { 0, NULL, 0, THREAD_RUNNING, 0, 15, 15, {0} };
 
@@ -294,7 +304,7 @@ void schedule (void)
 	struct task_struct *next = pick ();
 	if (next)
 	{
-		// * 这句话的汇编语言是出错的, debugging *
+		// 汇编语言switch_to.s 定义的函数 (debugging)
 		switch_to (next);
 	}
 }
