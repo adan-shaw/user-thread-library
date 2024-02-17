@@ -77,9 +77,9 @@ static void start (struct task_struct *tsk)
 	printf ("thread [%d] th_resume\n", tsk->id);
 }
 
-int th_create (int *tid, void (*start_routine) ())
+int th_create (int *tid, void (*start_routine) (void))
 {
-	int id = -1;
+	int *stack, id = -1;
 	struct task_struct *tsk = (struct task_struct *) malloc (sizeof (struct task_struct));
 	while (++id < NR_TASKS && task[id]) ;
 	if (id == NR_TASKS)
@@ -89,7 +89,7 @@ int th_create (int *tid, void (*start_routine) ())
 		*tid = id;									//返回值
 	tsk->id = id;
 	tsk->th_fn = start_routine;
-	int *stack = tsk->stack;			// 栈顶界限
+	stack = tsk->stack;						// 栈顶界限
 	tsk->esp = (int) (stack + STACK_SIZE - 11);
 	tsk->wakeuptime = 0;
 	tsk->status = THREAD_STOP;
@@ -204,13 +204,14 @@ int th_join (int tid)
 
 
 
-static unsigned int getmstime (void)
+static unsigned int get_time_ms (void)
 {
 	struct timeval tv;
 	if (gettimeofday (&tv, NULL) < 0)
 	{
 		perror ("gettimeofday()");
-		exit (-1);
+		//exit (-1);//弃用结束程序, 防止线城池崩溃
+		return 0;
 	}
 	return tv.tv_sec * 1000 + tv.tv_usec / 1000;
 }
@@ -238,11 +239,10 @@ static struct task_struct *pick (void)
 			continue;
 		}
 
-		if (task[i]->status != THREAD_STOP && task[i]->status != THREAD_BLOCK && getmstime () > task[i]->wakeuptime)
+		if (task[i]->status != THREAD_STOP && task[i]->status != THREAD_BLOCK && get_time_ms () > task[i]->wakeuptime)
 		{
 			task[i]->status = THREAD_RUNNING;
 		}
-
 	}
 
 	//上面的作用是唤醒睡眠的线程,使其可以接受调度
@@ -260,6 +260,7 @@ static struct task_struct *pick (void)
 				next = i;
 			}
 		}
+
 		if (c)
 			break;
 
@@ -312,7 +313,7 @@ void schedule (void)
 
 void th_sleep (int seconds)
 {
-	current->wakeuptime = getmstime () + 1000 * seconds;
+	current->wakeuptime = get_time_ms () + 1000 * seconds;
 	current->status = THREAD_SLEEP;
 	schedule ();
 }
@@ -332,7 +333,7 @@ __attribute__((constructor)) static void init ()
 	value.it_value.tv_sec = 0;
 	value.it_value.tv_usec = 1000;
 	value.it_interval.tv_sec = 0;
-	value.it_interval.tv_usec = 1000 * 10;	// 10 ms
+	value.it_interval.tv_usec = 1000 * 10;// 10 ms
 	if (setitimer (ITIMER_REAL, &value, NULL) < 0)
 	{
 		perror ("setitimer()");
