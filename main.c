@@ -1,5 +1,5 @@
-#include"thread.h"
 #include<stdio.h>
+#include"thread.h"
 
 //这种小型线城池, 就不要太挑剔了, 只适合小型系统, 没有太多信息传递
 /*
@@ -20,14 +20,14 @@
 */
 
 
+
 #define th_print_count (32)
 #define th_print_sleep_count (1)
 
 void fun1 (void)
 {
 	int i = 0;
-	for (i = 0; i < 10; i++)
-	{
+	for (i = 0; i < 10; i++){
 		printf ("thread id=%d time=%d\n", 1, i);
 		th_sleep (th_print_sleep_count);
 	}
@@ -36,17 +36,14 @@ void fun1 (void)
 void fun2 (void)
 {
 	int i = 0;
-	for (i = 0; i < 10; i++)
-	{
+	for (i = 0; i < 10; i++){
 		printf ("thread id=%d time=%d\n", 2, i);
-		if (i == 4)
-		{
+		if (i == 4){
 			th_wait (1);
 			printf ("wait thread 1 \n");
 		}
 		th_sleep (1);
-		if (i == 6)
-		{
+		if (i == 6){
 			th_resume (1);
 			printf ("th_resume thread 1 \n");
 		}
@@ -56,8 +53,7 @@ void fun2 (void)
 void fun3 (void)
 {
 	int i = 0;
-	for (i = 0; i < 10; i++)
-	{
+	for (i = 0; i < 10; i++){
 		printf ("thread id=%d time=%d\n", 3, i);
 		th_sleep (th_print_sleep_count);
 	}

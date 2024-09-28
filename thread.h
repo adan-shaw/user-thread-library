@@ -27,8 +27,8 @@ struct task_struct
 
 //thread api
 void th_wait4quit (int tid);
-int th_create (int *tid, void (*start_routine) (void));
-int th_join (int tid);
+int  th_create (int *tid, void (*start_routine) (void));
+int  th_join (int tid);
 void th_resume (int tid);
 void th_wait (int tid);
 void wait_all (void);

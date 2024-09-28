@@ -43,12 +43,12 @@
 
 /* 定义全局函数的详细内容 */
 switch_to:
-	call closealarm   /* 调用函数closealarm() */
+	call closealarm     /* 调用函数closealarm() */
 
 	push %ebp
-	mov %esp, %ebp    /* 更改栈帧, 以便寻参 */
+	mov %esp, %ebp      /* 更改栈帧, 以便寻参 */
 
-										/* 保存现场 */
+											/* 保存现场 */
 	push %edi
 	push %esi
 	push %ebx
@@ -57,14 +57,14 @@ switch_to:
 	push %eax
 	pushfl
 
-										/* 准备切换栈 */
-	mov current, %eax /* 取 current 基址放到 eax */
-	mov %esp, 8(%eax) /* 保存当前 esp 到线程结构体 */
-	mov 8(%ebp), %eax /* 8(%ebp)即为c语言的传入参数next, 取下一个线程结构体基址 */
-	mov %eax, current /* 更新 current */
-	mov 8(%eax), %esp /* 切换到下一个线程的栈 */
+											/* 准备切换栈 */
+	mov pcur_task, %eax /* 取 pcur_task 基址放到 eax */
+	mov %esp, 8(%eax)   /* 保存当前 esp 到线程结构体 */
+	mov 8(%ebp), %eax   /* 8(%ebp)即为c语言的传入参数next, 取下一个线程结构体基址 */
+	mov %eax, pcur_task /* 更新 pcur_task */
+	mov 8(%eax), %esp   /* 切换到下一个线程的栈 */
 
-										/* 恢复现场, 到这里, 已经进入另一个线程环境了, 本质是 esp 改变 */
+									  	/* 恢复现场, 到这里, 已经进入另一个线程环境了, 本质是 esp 改变 */
 	popfl
 	popl %eax
 	popl %ecx
@@ -74,7 +74,7 @@ switch_to:
 	popl %edi
 	popl %ebp
 
-	call openalarm    /* 调用函数openalarm() */
+	call openalarm      /* 调用函数openalarm() */
 
 /* 汇编式函数返回, 相当于c 语言的return */
 ret
